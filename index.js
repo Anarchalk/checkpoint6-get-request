@@ -1,56 +1,54 @@
 'use strict';
+const searchURL = '';
 
-
-
-const searchURL = 'https://api.github.com/users/'+searchTerm+'/repos';
-
-function formatQueryParams(params) {
-    const queryItems= Object.keys(params)
-    .map(key=> `${key}=${params[key]}`)
-    return queryItems.join('&');
-    
-}
-
-function displayResults(responseJson) {
-console.log(responseJson);
-$('#results-list').empty();
-$('#results-list').append(``
-
-);
-
+const params = {
+    type: "owner",
+    sort: "created"
 };
 
-function getNews(query) {
-    const params = {
-        type: "owner",
-        sort: "created"
-    };
-    const queryString = formatQueryParams(params)
-    const url = searchURL + '?' + queryString;
 
-    console.log(url);
+// function formatQueryParams(params) { 
+// const queryItems = Object.keys(params)
+//     .map(key => `${key}=${params[key]}`)
+// return queryItems.join('&');
 
-    };
 
-    fetch(url, options)
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error(response.statusText);
+function getRepo(UrlLink) {
+    fetch(UrlLink)
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error(console.log(response.statusText));
+    })
+    .then(responseJson => {
+        Object.keys(responseJson).forEach(index => {
+            const resultsContainer = document.getElementById('results-list');
+            const content = document.createElement("p");
+            content.innerText = responseJson[index].owner;
+            resultsContainer.appendChild(content);
+                            console.log('obj data', responseJson[index].owner)
+
         })
-        .then(responseJson => displayResults(responseJson, maxResults))
-        .catch(err => {
-            $('#js-error-message').text(`Something went wrong: ${err.message}`);
-        });
-
-
-function watchForm() {
-    $('form').submit(event => {
-        event.preventDefault();
-        const searchTerm = $('#js-search-term').val();
-        getNews(searchTerm);
+    }
+        )
+    .catch(err => {
+        $('#js-error-message').text(`Something went wrong: ${err.message}`);
     });
 }
 
-$(watchForm);
+
+function handleSubmit() {
+    $('form').submit(event => {
+        event.preventDefault();
+        const searchTerm = document.getElementById("js-search-term").value;
+        console.log(searchTerm);
+        this.searchURL = 'https://api.github.com/users/' + searchTerm + `/repos?type=${params.type}&sort=${params.sort}`;
+        console.log(JSON.stringify(searchURL));
+        getRepo(this.searchURL);
+
+    }
+    )}
+    
+
+$(handleSubmit);
